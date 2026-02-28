@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tcm-mcp-server"
+version = "0.1.0"
+description = "TCM Constitution MCP Server"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+# 关键：定义一个命令行入口，指向 server.py 的 main 逻辑
+# 但因为我们直接用 python 运行脚本，这步其实可以简化
+# 这里只是为了让 uvx 识别这是一个合法的项目
+start-mcp = "server:main" 
