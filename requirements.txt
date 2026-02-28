@@ -1,0 +1,13 @@
+# 核心依赖
+fastmcp
+requests
+pydantic>=2.5.0
+
+# 开发依赖
+pytest
+black
+flake8
+
+# 版本锁定
+fastmcp>=1.0.0
+requests>=2.31.0
