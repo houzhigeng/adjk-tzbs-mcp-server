@@ -148,94 +148,9 @@ def handle_request(req: dict) -> dict:
         
         log(f"Calling tool: {tool_name} with args: {arguments}")
         
-        if tool_name == "analyze_constitution":
-            face_url = arguments.get("face_image_url", "")
-            tongue_url = arguments.get("tongue_image_url", "")
-            
-            if not face_url or not tongue_url:
-                return {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {
-                        "code": -32602,
-                        "message": "Missing required arguments: face_image_url and tongue_image_url"
-                    }
-                }
-            
-            # 执行业务逻辑
-            if IS_MOCK or not HAS_REQUESTS:
-                log("⚠️ Running in MOCK mode" + (" (requests library not available)" if not HAS_REQUESTS else ""))
-                result_data = get_mock_analysis_result(face_url, tongue_url)
-            else:
-                # 真实 API 调用逻辑
-                log(f"✅ Running in REAL API mode: {API_URL}")
-                try:
-                    # 构建请求数据
-                    payload = {
-                        "faceImgUrl": face_url,
-                        "tongueImgUrl": tongue_url
-                    }
-                    
-                    # 设置请求头
-                    headers = {
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {API_KEY}"
-                    }
-                    
-                    # 调用 API
-                    response = requests.post(API_URL, json=payload, headers=headers, timeout=30)
-                    response.raise_for_status()
-                    
-                    # 解析响应
-                    api_result = response.json()
-                    
-                    if api_result.get('code') == 200:
-                        data = api_result.get('data', {})
-                        # 转换为标准格式
-                        result_data = {
-                            "status": "success",
-                            "is_mock": False,
-                            "primary_constitution": data.get('primary_constitution', ''),
-                            "confidence_score": data.get('confidence_score', 0.0),
-                            "description": data.get('description', ''),
-                            "evidence": {
-                                "face": data.get('face_evidence', ''),
-                                "tongue": data.get('tongue_evidence', '')
-                            },
-                            "suggestions": {
-                                "diet": data.get('diet_suggestion', ''),
-                                "lifestyle": data.get('lifestyle_suggestion', '')
-                            },
-                            "warning": "" if not data.get('warning_flags') else "，".join(data.get('warning_flags', []))
-                        }
-                    else:
-                        log(f"API returned error: {api_result.get('message')}")
-                        result_data = {
-                            "status": "error",
-                            "message": f"API 返回错误：{api_result.get('message')}"
-                        }
-                        
-                except Exception as e:
-                    log(f"API request failed: {str(e)}")
-                    result_data = {
-                        "status": "error",
-                        "message": f"API 调用失败：{str(e)}"
-                    }
-            
-            # 构造符合 MCP 标准的返回格式
-            return {
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "result": {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(result_data, ensure_ascii=False)
-                        }
-                    ]
-                }
-            }
-        else:
+        # 检查工具名称
+        if tool_name != "analyze_constitution":
+            log(f"Unknown tool: {tool_name}")
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
@@ -244,6 +159,94 @@ def handle_request(req: dict) -> dict:
                     "message": f"Unknown tool: {tool_name}"
                 }
             }
+        
+        # 处理 analyze_constitution 工具
+        face_url = arguments.get("face_image_url", "")
+        tongue_url = arguments.get("tongue_image_url", "")
+            
+        if not face_url or not tongue_url:
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {
+                    "code": -32602,
+                    "message": "Missing required arguments: face_image_url and tongue_image_url"
+                }
+            }
+            
+        # 执行业务逻辑
+        if IS_MOCK or not HAS_REQUESTS:
+            log("⚠️ Running in MOCK mode" + (" (requests library not available)" if not HAS_REQUESTS else ""))
+            result_data = get_mock_analysis_result(face_url, tongue_url)
+        else:
+            # 真实 API 调用逻辑
+            log(f"✅ Running in REAL API mode: {API_URL}")
+            try:
+                # 构建请求数据
+                payload = {
+                    "faceImgUrl": face_url,
+                    "tongueImgUrl": tongue_url
+                }
+                
+                # 设置请求头
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {API_KEY}"
+                }
+                
+                # 调用 API
+                response = requests.post(API_URL, json=payload, headers=headers, timeout=30)
+                response.raise_for_status()
+                
+                # 解析响应
+                api_result = response.json()
+                
+                if api_result.get('code') == 200:
+                    data = api_result.get('data', {})
+                    # 转换为标准格式
+                    result_data = {
+                        "status": "success",
+                        "is_mock": False,
+                        "primary_constitution": data.get('primary_constitution', ''),
+                        "confidence_score": data.get('confidence_score', 0.0),
+                        "description": data.get('description', ''),
+                        "evidence": {
+                            "face": data.get('face_evidence', ''),
+                            "tongue": data.get('tongue_evidence', '')
+                        },
+                        "suggestions": {
+                            "diet": data.get('diet_suggestion', ''),
+                            "lifestyle": data.get('lifestyle_suggestion', '')
+                        },
+                        "warning": "" if not data.get('warning_flags') else "，".join(data.get('warning_flags', []))
+                    }
+                else:
+                    log(f"API returned error: {api_result.get('message')}")
+                    result_data = {
+                        "status": "error",
+                        "message": f"API 返回错误：{api_result.get('message')}"
+                    }
+                    
+            except Exception as e:
+                log(f"API request failed: {str(e)}")
+                result_data = {
+                    "status": "error",
+                    "message": f"API 调用失败：{str(e)}"
+                }
+            
+        # 构造符合 MCP 标准的返回格式
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": json.dumps(result_data, ensure_ascii=False)
+                    }
+                ]
+            }
+        }
 
     # --- 5. 未知方法 ---
     log(f"Unknown method: {method}")

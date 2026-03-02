@@ -1,0 +1,18 @@
+MCP配置备忘：
+{
+  "mcpServers": {
+    "tcm-vision-analyzer": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/houzhigeng/adjk-tzbs-mcp-server.git",
+        "tcm-mcp"
+      ],
+      "env": {
+        "TCM_API_URL": "https://adjkdemo.shuzizg.com/adjk/api/v1/deviceDiagnosis/faceTongueDiagnosis",
+        "TCM_API_KEY": "yJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55SWQiOm51bGwsInVzZXJfbmFtZSI6bnVsbCwib3BlbklkIjpudWxsLCJzY29wZSI6WyJhbGwiXSwiYXBwSWQiOm51bGwsImRlcHRJZCI6bnVsbCwiZXhwIjoxNzQ1NDEwMzk5LCJvcGVuVXNlcklkIjoiMSIsInVzZXJJZCI6bnVsbCwianRpIjoiN2Q3NmE3MDAtOGE1MC00ODA2LTgwYTMtZDY1NGQzNDUxY2ZkIiwiY2xpZW50X2lkIjoicnVuLWFkbWluIiwidXNlcm5hbWUiOm51bGx9.YTYMjcDgh4nIaKw3-LkrqoA3MzlOs7aUk1Y0Tcev_LlCcJogp2KvyE9b6Vp5Wj9gsveod-1_qeApevFsFZUgq30rPUOWd7FcxatncfGPjngr1AGVr4cBKOQlxEj7geUTGdAQQfzmSSLiF-9_JbbuXa04_FsV9W6XYaC8_2f6BHxJYSTGh-ZN9y5jIARgnnpptJHmD1HhMGhCw9rRQo2dU-FVrmf-vZ5u-F_WO2wQoUnf_1g3n_Fsvm5AgIpbWx0SGaeuBrGY-0aJr8wyYDNhZhSoBG_E6IIbfTHbyUQifPRzGwW7bleUfNZCf-cqqPOlZb73Fj0SLI1Rw8x7WJY9NA",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}
