@@ -1,1 +1,5 @@
-# No external dependencies required for this minimal version
+# 核心依赖
+requests
+
+# 版本锁定
+requests>=2.31.0

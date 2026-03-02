@@ -8,6 +8,7 @@ import sys
 import json
 import os
 import random
+import requests
 
 # ==========================================
 # 1. 安全日志配置 (严禁污染 stdout)
@@ -158,12 +159,72 @@ def handle_request(req: dict) -> dict:
                 log("⚠️ Running in MOCK mode")
                 result_data = get_mock_analysis_result(face_url, tongue_url)
             else:
-                # 真实 API 调用逻辑 (暂未实现)
-                log("❌ Real API mode not implemented yet")
-                result_data = {
-                    "status": "error",
-                    "message": "Real API backend is not configured. Please set TCM_API_URL environment variable."
-                }
+                # 真实 API 调用逻辑
+                log(f"✅ Running in REAL API mode: {API_URL}")
+                try:
+                    # 构建请求数据
+                    payload = {
+                        "data": {
+                            "face_image": face_url,
+                            "tongue_image": tongue_url
+                        },
+                        "config": {
+                            "return_confidence": True,
+                            "include_suggestions": True
+                        }
+                    }
+                    
+                    # 设置请求头
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {API_KEY}"
+                    }
+                    
+                    # 调用 API
+                    response = requests.post(API_URL, json=payload, headers=headers, timeout=30)
+                    response.raise_for_status()
+                    
+                    # 解析响应
+                    api_result = response.json()
+                    
+                    if api_result.get('code') == 200:
+                        data = api_result.get('data', {})
+                        # 转换为标准格式
+                        result_data = {
+                            "status": "success",
+                            "is_mock": False,
+                            "primary_constitution": data.get('primary_constitution', ''),
+                            "confidence_score": data.get('confidence_score', 0.0),
+                            "description": data.get('description', ''),
+                            "evidence": {
+                                "face": data.get('face_evidence', ''),
+                                "tongue": data.get('tongue_evidence', '')
+                            },
+                            "suggestions": {
+                                "diet": data.get('diet_suggestion', ''),
+                                "lifestyle": data.get('lifestyle_suggestion', '')
+                            },
+                            "warning": "" if not data.get('warning_flags') else "，".join(data.get('warning_flags', []))
+                        }
+                    else:
+                        log(f"API returned error: {api_result.get('message')}")
+                        result_data = {
+                            "status": "error",
+                            "message": f"API 返回错误：{api_result.get('message')}"
+                        }
+                        
+                except requests.exceptions.RequestException as e:
+                    log(f"API request failed: {str(e)}")
+                    result_data = {
+                        "status": "error",
+                        "message": f"API 调用失败：{str(e)}"
+                    }
+                except Exception as e:
+                    log(f"Unexpected error: {str(e)}")
+                    result_data = {
+                        "status": "error",
+                        "message": f"未知错误：{str(e)}"
+                    }
             
             # 构造符合 MCP 标准的返回格式
             return {
