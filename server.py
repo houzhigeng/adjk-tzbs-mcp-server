@@ -164,14 +164,8 @@ def handle_request(req: dict) -> dict:
                 try:
                     # 构建请求数据
                     payload = {
-                        "data": {
-                            "face_image": face_url,
-                            "tongue_image": tongue_url
-                        },
-                        "config": {
-                            "return_confidence": True,
-                            "include_suggestions": True
-                        }
+                        "faceImgUrl": face_url,
+                        "tongueImgUrl": tongue_url
                     }
                     
                     # 设置请求头
