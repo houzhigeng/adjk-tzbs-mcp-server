@@ -7,7 +7,7 @@ name = "tcm-mcp-server"
 version = "0.1.0"
 description = "TCM Constitution MCP Server"
 requires-python = ">=3.8"
-dependencies = []
+dependencies = ["requests>=2.31.0"]
 
 [project.scripts]
 # 这里定义的 'tcm-mcp' 命令会指向 server.py 中的 main 函数
