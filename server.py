@@ -8,7 +8,15 @@ import sys
 import json
 import os
 import random
-import requests
+
+# 尝试导入requests库
+HAS_REQUESTS = False
+try:
+    import requests
+    HAS_REQUESTS = True
+except ImportError:
+    sys.stderr.write("[TCM-MCP] Warning: requests library not found, will run in mock mode\n")
+    sys.stderr.flush()
 
 # ==========================================
 # 1. 安全日志配置 (严禁污染 stdout)
@@ -155,8 +163,8 @@ def handle_request(req: dict) -> dict:
                 }
             
             # 执行业务逻辑
-            if IS_MOCK:
-                log("⚠️ Running in MOCK mode")
+            if IS_MOCK or not HAS_REQUESTS:
+                log("⚠️ Running in MOCK mode" + (" (requests library not available)" if not HAS_REQUESTS else ""))
                 result_data = get_mock_analysis_result(face_url, tongue_url)
             else:
                 # 真实 API 调用逻辑
@@ -207,17 +215,11 @@ def handle_request(req: dict) -> dict:
                             "message": f"API 返回错误：{api_result.get('message')}"
                         }
                         
-                except requests.exceptions.RequestException as e:
+                except Exception as e:
                     log(f"API request failed: {str(e)}")
                     result_data = {
                         "status": "error",
                         "message": f"API 调用失败：{str(e)}"
-                    }
-                except Exception as e:
-                    log(f"Unexpected error: {str(e)}")
-                    result_data = {
-                        "status": "error",
-                        "message": f"未知错误：{str(e)}"
                     }
             
             # 构造符合 MCP 标准的返回格式

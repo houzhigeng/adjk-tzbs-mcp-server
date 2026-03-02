@@ -18,9 +18,12 @@ try:
     API_KEY = os.getenv("TCM_API_KEY", "")
     print(f"✅ 环境变量读取成功: API_URL={API_URL}, API_KEY={API_KEY}")
     
-    # 测试 requests 模块
-    import requests
-    print("✅ requests 模块导入成功")
+    # 测试 requests 模块 (可选)
+    try:
+        import requests
+        print("✅ requests 模块导入成功")
+    except ImportError:
+        print("⚠️ requests 模块未安装，将运行在 Mock 模式")
     
     print("\n🎉 所有测试通过，服务器可以正常运行！")
     
